@@ -1,7 +1,7 @@
 docker run --name nimbus-postgres-db -d \
             -p 5432:5432 \
             -e POSTGRES_USER=admin \
-            -e POSTGRES_PASSWORD=admin \
+            -e POSTGRES_PASSWORD=12345678 \
             -e POSTGRES_DB=nimbus_db \
             -v postgres_data:/var/lib/postgresql/data \
             postgres:14-alpine
@@ -10,6 +10,7 @@ docker run -d \
    -p 9000:9000 \
    -p 9001:9001 \
    --name minio-server \
+   -v ./minio-data:/data \
    -e "MINIO_ROOT_USER=admin" \
-   -e "MINIO_ROOT_PASSWORD=admin" \
+   -e "MINIO_ROOT_PASSWORD=12345678" \
    minio/minio server /data --console-address ":9001"

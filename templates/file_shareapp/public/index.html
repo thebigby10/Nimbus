@@ -1,1 +1,16 @@
-<h1>file_shareapp->public_view<h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload File</title>
+</head>
+<body>
+    <h2>Upload a New Document</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Upload</button>
+    </form>
+    <hr>
+    <a href="{% url 'file_shareapp:file_list' %}">View all uploaded files</a>
+</body>
+</html>

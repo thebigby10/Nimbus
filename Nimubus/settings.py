@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user_auth',
     'file_shareapp',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -120,3 +121,33 @@ ALLOWED_HOSTS = ['*']
 
 LOGIN_REDIRECT_URL = '/'      
 LOGOUT_REDIRECT_URL = '/'     
+
+# --- MinIO Storage Settings ---
+
+# Use AWS S3 Boto3 storage backend for default file storage
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# Credentials for MinIO
+AWS_ACCESS_KEY_ID = 'admin'
+AWS_SECRET_ACCESS_KEY = '12345678'
+
+# The name of the bucket you created in the MinIO console
+AWS_STORAGE_BUCKET_NAME = 'nimbus-upload-bucket' 
+
+# The URL for your MinIO server's API endpoint
+AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9000'
+
+# Standard S3 settings
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400', # Cache files for 1 day
+}
+
+# Optional: A sub-directory within the bucket to store all uploaded media
+# AWS_LOCATION = 'media'
+
+MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
+
+# Important for local development with http
+AWS_S3_USE_SSL = False
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+
