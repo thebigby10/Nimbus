@@ -16,6 +16,28 @@ Nimbus is a web application designed for quick and easy file sharing. It allows 
 
 ---
 
+## 🎬 Features in Action
+
+### 🚀 Instant & Anonymous Uploads
+
+Quickly upload a file without needing an account. Get a shareable link in seconds. Files are automatically set to expire in 7 days.
+
+![nimbus_1](https://github.com/user-attachments/assets/0e101874-103f-4f65-b1bd-f485842d7fce)
+
+### 👤 Role-Based Views
+
+The application provides a streamlined experience for both guests and registered users. Logged-in users get access to a personal dashboard to manage their files, while guests see a direct upload form.
+
+![nimbus_2](https://github.com/user-attachments/assets/2a4f1914-dc43-4d38-98d5-b82fcc35af0b)
+
+### ⚙️ Customizable Uploads for Users
+
+Registered users can add a custom title and set a specific expiry date for their files, giving them more control over their shared content.
+
+![nimbus_3](https://github.com/user-attachments/assets/9af89491-533b-4c8e-9b0d-b1fd0b18e398)
+
+---
+
 ## 🛠️ Tech Stack
 
 * **Backend**: Django
