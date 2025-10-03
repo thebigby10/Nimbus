@@ -13,80 +13,96 @@ from django.shortcuts import get_object_or_404
 
 import os
 
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, Http404
 
 from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
+
 def public_view(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = PublicFileForm(request.POST, request.FILES)
-        
+
         if form.is_valid():
             try:
                 new_file = form.save(commit=False)
 
-                # uploaded_file = request.FILES['uploaded_file']
+                uploaded_file = request.FILES["uploaded_file"]
                 new_file.title = uploaded_file.name
                 new_file.expiry_date = timezone.now().date() + timedelta(days=7)
                 new_file.save()
-                return redirect('file_shareapp:file_detail_view', file_id = new_file.id)
+                return redirect("file_shareapp:file_detail_view", file_id=new_file.id)
             except Exception as e:
                 print(e)
                 logger.exception("File upload to MinIO failed.")
 
     else:
         form = PublicFileForm()
-        
-    return render(request ,'file_shareapp/public/index.html', {'form':form})
+
+    return render(request, "file_shareapp/public/index.html", {"form": form})
+
 
 @login_required
 def auth_view(request):
-    if request.method=='POST':
+    if request.method == "POST":
         form = AuthenticatedFileForm(request.POST, request.FILES)
 
         if form.is_valid():
             try:
                 new_file = form.save(commit=False)
-                # uploaded_file = request.FILES['uploaded_file']
-                # title = request.FILES['title']
-                # expiery_date = request.FILES['expiry_date']
+                # uploaded_file = request.FILES["uploaded_file"]
+                # new_file.title = request.FILES["title"]
+                # new_file.expiry_date = request.FILES["expiry_date"]
                 new_file.user = request.user
                 new_file.save()
-                return redirect('file_shareapp:file_detail_view', file_id = new_file.id)
+                return redirect("file_shareapp:file_detail_view", file_id=new_file.id)
             except Exception as e:
                 print(e)
                 logger.exception("File upload to MinIO failed.")
-
 
         pass
     else:
         form = AuthenticatedFileForm()
 
-    return render(request ,'file_shareapp/authenticated/index.html', {'form':form})
+    return render(request, "file_shareapp/authenticated/index.html", {"form": form})
+
 
 @login_required
 def dashboard(request):
     documents = File.objects.filter(user=request.user)
-    return render(request, 'file_shareapp/dashboard.html', {'documents': documents})
+    return render(request, "file_shareapp/dashboard.html", {"documents": documents})
 
 
 def file_detail(request, file_id):
     file_data = get_object_or_404(File, id=file_id)
-    context = {
-        'file_upload': file_data,
-        'BASE_URL': 'http://localhost:8000'
-    }
-    return render(request, 'file_shareapp/file_detail.html', context)
+    context = {"file_upload": file_data, "BASE_URL": "http://localhost:8000"}
+    return render(request, "file_shareapp/file_detail.html", context)
 
-def file_download(request,file_id):
+
+def file_download(request, file_id):
     uploaded_file = get_object_or_404(File, pk=file_id)
 
     file_path = uploaded_file.uploaded_file.path
 
     if os.path.exists(file_path):
-        response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+        response = FileResponse(open(file_path, "rb"), as_attachment=True)
         return response
 
     raise Http404
+
+
+def file_delete(request, file_id):
+    uploaded_file = get_object_or_404(File, pk=file_id)
+
+    file_path = uploaded_file.uploaded_file.path
+
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")
+            raise Http500
+
+    uploaded_file.delete()
+    return redirect("file_shareapp:dashboard")
