@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import PublicFileForm
+from .forms import PublicFileForm, AuthenticatedFileForm
 from .models import File
 
 from django.utils import timezone
@@ -15,18 +15,19 @@ import os
 
 from django.http import FileResponse, Http404
 
+from django.contrib.auth.decorators import login_required
+
 logger = logging.getLogger(__name__)
 
 def public_view(request):
     if request.method == 'POST':
-        print("Received a POST request.")
         form = PublicFileForm(request.POST, request.FILES)
         
         if form.is_valid():
             try:
                 new_file = form.save(commit=False)
 
-                uploaded_file = request.FILES['uploaded_file']
+                # uploaded_file = request.FILES['uploaded_file']
                 new_file.title = uploaded_file.name
                 new_file.expiry_date = timezone.now().date() + timedelta(days=7)
                 new_file.save()
@@ -40,17 +41,36 @@ def public_view(request):
         
     return render(request ,'file_shareapp/public/index.html', {'form':form})
 
-
+@login_required
 def auth_view(request):
-    return render(request ,'file_shareapp/authenticated/index.html')
+    if request.method=='POST':
+        form = AuthenticatedFileForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            try:
+                new_file = form.save(commit=False)
+                # uploaded_file = request.FILES['uploaded_file']
+                # title = request.FILES['title']
+                # expiery_date = request.FILES['expiry_date']
+                new_file.user = request.user
+                new_file.save()
+                return redirect('file_shareapp:file_detail_view', file_id = new_file.id)
+            except Exception as e:
+                print(e)
+                logger.exception("File upload to MinIO failed.")
 
 
-# def file_list(request):
-#     documents = File.objects.all()
-#     return render(request, 'file_shareapp/file_list.html', {'documents': documents})
+        pass
+    else:
+        form = AuthenticatedFileForm()
 
-# def success_view(request):
-#     return render(request, 'file_shareapp/success.html');
+    return render(request ,'file_shareapp/authenticated/index.html', {'form':form})
+
+@login_required
+def dashboard(request):
+    documents = File.objects.filter(user=request.user)
+    return render(request, 'file_shareapp/dashboard.html', {'documents': documents})
+
 
 def file_detail(request, file_id):
     file_data = get_object_or_404(File, id=file_id)

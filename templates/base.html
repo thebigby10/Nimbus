@@ -40,7 +40,7 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Dashboard</a>
+                        <a class="nav-link active" aria-current="page" href="{% url 'file_shareapp:dashboard' %}">Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/">Share File</a>

@@ -9,4 +9,4 @@ class PublicFileForm(forms.ModelForm):
 class AuthenticatedFileForm(forms.ModelForm):
     class Meta:
         model = File
-        fields = ('title', 'uploaded_file', 'expiry_date',)
+        fields = ('uploaded_file', 'title', 'expiry_date',)
