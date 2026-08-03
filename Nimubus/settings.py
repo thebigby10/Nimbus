@@ -8,15 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-if not SECRET_KEY:
-    raise ValueError('DJANGO_SECRET_KEY environment variable is not set')
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h]
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -35,6 +31,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -67,18 +64,16 @@ WSGI_APPLICATION = 'Nimubus.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'nimbus_db'),
-        'USER': os.environ.get('DB_USER', 'admin'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["POSTGRES_DB"],
+        "USER": os.environ["POSTGRES_USER"],
+        "PASSWORD": os.environ["POSTGRES_PASSWORD"],
+        "HOST": os.environ["POSTGRES_HOST"],
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        "OPTIONS": {"sslmode": os.environ.get("POSTGRES_SSLMODE", "require")},
     }
 }
-
-if not DATABASES['default']['PASSWORD']:
-    raise ValueError('DB_PASSWORD environment variable is not set')
 
 
 # Password validation
@@ -116,46 +111,28 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = ['*']
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
-LOGIN_REDIRECT_URL = '/'      
-LOGOUT_REDIRECT_URL = '/'     
+# --- Azure Blob Storage Settings ---
 
-# --- MinIO Storage Settings ---
-
-# Use AWS S3 Boto3 storage backend for default file storage
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# Credentials for MinIO
-AWS_ACCESS_KEY_ID = os.environ.get('MINIO_ACCESS_KEY')
-AWS_SECRET_ACCESS_KEY = os.environ.get('MINIO_SECRET_KEY')
-
-if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
-    raise ValueError('MINIO_ACCESS_KEY and MINIO_SECRET_KEY environment variables must be set')
-
-# The name of the bucket you created in the MinIO console
-AWS_STORAGE_BUCKET_NAME = 'nimbus-upload-bucket' 
-
-# The URL for your MinIO server's API endpoint
-AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9000'
-
-# Standard S3 settings
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400', # Cache files for 1 day
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": os.environ["AZURE_ACCOUNT_NAME"],
+            "account_key": os.environ["AZURE_ACCOUNT_KEY"],
+            "azure_container": os.environ.get("AZURE_CONTAINER", "nimbus-upload-bucket"),
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    },
 }
-
-# Optional: A sub-directory within the bucket to store all uploaded media
-# AWS_LOCATION = 'media'
-
-MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
-
-# Important for local development with http
-AWS_S3_USE_SSL = False
-AWS_S3_SIGNATURE_VERSION = 's3v4'
-
