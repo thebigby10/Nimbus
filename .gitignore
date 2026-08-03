@@ -3,3 +3,4 @@
 **/.minio.sys/
 /uploads/
 db.sqlite3
+.env

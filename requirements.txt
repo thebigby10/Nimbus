@@ -1,11 +1,12 @@
 asgiref==3.9.2
 boto3==1.40.43
+gunicorn==23.0.0
 botocore==1.40.43
 click==8.3.0
 colorama==0.4.6
 cssbeautifier==1.15.4
 Django==5.2.6
-django-storages==1.14.6
+django-storages[azure]==1.14.6
 djlint==1.36.4
 EditorConfig==0.17.1
 jmespath==1.0.1
@@ -21,3 +22,4 @@ six==1.17.0
 sqlparse==0.5.3
 tqdm==4.67.1
 urllib3==2.5.0
+whitenoise==6.8.2
