@@ -1,0 +1,8 @@
+.venv
+**/__pycache__/
+**/.minio.sys/
+/uploads/
+/db.sqlite3
+/.env
+/staticfiles/
+.git
