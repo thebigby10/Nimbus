@@ -11,8 +11,6 @@ from django.conf import settings
 
 from django.shortcuts import get_object_or_404
 
-import os
-
 from django.http import FileResponse, Http404, Http404
 
 from django.contrib.auth.decorators import login_required
@@ -83,11 +81,10 @@ def file_detail(request, file_id):
 def file_download(request, file_id):
     uploaded_file = get_object_or_404(File, pk=file_id)
 
-    file_path = uploaded_file.uploaded_file.path
+    storage_file = uploaded_file.uploaded_file
 
-    if os.path.exists(file_path):
-        response = FileResponse(open(file_path, "rb"), as_attachment=True)
-        return response
+    if storage_file.storage.exists(storage_file.name):
+        return FileResponse(storage_file.open("rb"), as_attachment=True)
 
     raise Http404
 
@@ -95,14 +92,6 @@ def file_download(request, file_id):
 def file_delete(request, file_id):
     uploaded_file = get_object_or_404(File, pk=file_id)
 
-    file_path = uploaded_file.uploaded_file.path
-
-    if os.path.exists(file_path):
-        try:
-            os.remove(file_path)
-        except Exception as e:
-            print(f"Error deleting file {file_path}: {e}")
-            raise Http500
-
+    uploaded_file.uploaded_file.delete(save=False)
     uploaded_file.delete()
     return redirect("file_shareapp:dashboard")
