@@ -9,7 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$60!bkpwv-9xlzmhv^dm&ywxge+c6j^jldrk=!ag^l2i@+frto'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError('DJANGO_SECRET_KEY environment variable is not set')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -67,13 +69,16 @@ WSGI_APPLICATION = 'Nimubus.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': "nimbus_db",
-        'USER': "admin",
-        'PASSWORD': "admin",
-        'HOST': "localhost",
-        'PORT': "5432",
+        'NAME': os.environ.get('DB_NAME', 'nimbus_db'),
+        'USER': os.environ.get('DB_USER', 'admin'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
+
+if not DATABASES['default']['PASSWORD']:
+    raise ValueError('DB_PASSWORD environment variable is not set')
 
 
 # Password validation
@@ -128,8 +133,11 @@ LOGOUT_REDIRECT_URL = '/'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Credentials for MinIO
-AWS_ACCESS_KEY_ID = 'admin'
-AWS_SECRET_ACCESS_KEY = '12345678'
+AWS_ACCESS_KEY_ID = os.environ.get('MINIO_ACCESS_KEY')
+AWS_SECRET_ACCESS_KEY = os.environ.get('MINIO_SECRET_KEY')
+
+if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
+    raise ValueError('MINIO_ACCESS_KEY and MINIO_SECRET_KEY environment variables must be set')
 
 # The name of the bucket you created in the MinIO console
 AWS_STORAGE_BUCKET_NAME = 'nimbus-upload-bucket' 
