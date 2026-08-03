@@ -2,6 +2,8 @@
 
 Nimbus is a web application designed for quick and easy file sharing. It allows both anonymous and authenticated users to upload files and generate shareable links. The project is built with Django and utilizes MinIO for S3-compatible object storage.
 
+🔗 **Live demo**: [nimbus-app-30517.azurewebsites.net](https://nimbus-app-30517.azurewebsites.net)
+
 ---
 
 ## ✨ Key Features
