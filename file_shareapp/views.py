@@ -76,7 +76,7 @@ def dashboard(request):
 
 def file_detail(request, file_id):
     file_data = get_object_or_404(File, id=file_id)
-    context = {"file_upload": file_data, "BASE_URL": "http://localhost:8000"}
+    context = {"file_upload": file_data, "BASE_URL": request.build_absolute_uri("/").rstrip("/")}
     return render(request, "file_shareapp/file_detail.html", context)
 
 
